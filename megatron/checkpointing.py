@@ -50,7 +50,6 @@ def check_checkpoint_args(neox_args, checkpoint_args):
 
 
 def do_forward_pass(neox_args, model, inference=False):
-
     # set to eval mode
     model_was_in_train = model.training
     model.eval()
@@ -100,7 +99,7 @@ def check_forward_pass(neox_args, model, checkpoint_logits, inference):
 
     # check
     if (
-        logits is not None and checkpoint_logits is not None
+            logits is not None and checkpoint_logits is not None
     ):  # this could be the case for non-final pipeline stages
         if not (logits == checkpoint_logits).all().item():
             if mpu.get_data_parallel_rank() == 0:
@@ -184,7 +183,7 @@ def save_ds_checkpoint(iteration, model, neox_args):
     if neox_args.checkpoint_validation_with_forward_pass:
         logits = do_forward_pass(neox_args=neox_args, model=model)
         sd['checkpoint_validation_logits'] = logits
-    
+
     # checkpoint folder name
     tag = f"global_step{iteration}"
 
@@ -192,12 +191,13 @@ def save_ds_checkpoint(iteration, model, neox_args):
     model.save_checkpoint(neox_args.save, tag=tag, client_state=sd)
 
     # save config files
-    if  torch.distributed.get_rank() == 0 and neox_args.config_files is not None:
+    if torch.distributed.get_rank() == 0 and neox_args.config_files is not None:
         configs_directory = os.path.join(neox_args.save, tag, "configs")
         os.makedirs(configs_directory)
         for config_filename, config_data in neox_args.config_files.items():
             with open(os.path.join(configs_directory, config_filename), "w") as f:
                 f.write(config_data)
+
 
 def save_checkpoint(neox_args, iteration, model, optimizer, lr_scheduler):
     """Save a model checkpoint."""
@@ -217,7 +217,7 @@ def save_checkpoint(neox_args, iteration, model, optimizer, lr_scheduler):
 
 
 def load_checkpoint(
-    neox_args, model, optimizer, lr_scheduler, inference=False, iteration=None
+        neox_args, model, optimizer, lr_scheduler, inference=False, iteration=None
 ):
     """Load a model checkpoint and return the iteration."""
     if neox_args.deepspeed:
